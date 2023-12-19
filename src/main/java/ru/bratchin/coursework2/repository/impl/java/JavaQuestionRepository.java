@@ -2,6 +2,7 @@ package ru.bratchin.coursework2.repository.impl.java;
 
 import org.springframework.stereotype.Repository;
 import ru.bratchin.coursework2.entity.Question;
+import ru.bratchin.coursework2.exception.IncorrectQuestionException;
 import ru.bratchin.coursework2.exception.QuestionIsAlreadyPresentException;
 import ru.bratchin.coursework2.exception.QuestionNotFoundException;
 import ru.bratchin.coursework2.repository.api.QuestionRepository;
@@ -17,6 +18,9 @@ public class JavaQuestionRepository implements QuestionRepository {
 
     @Override
     public Question add(Question question) {
+        if (question == null || question.getQuestion() == null || question.getAnswer() == null) {
+            throw new IncorrectQuestionException();
+        }
         if (questions.add(question)) {
             return question;
         } else {

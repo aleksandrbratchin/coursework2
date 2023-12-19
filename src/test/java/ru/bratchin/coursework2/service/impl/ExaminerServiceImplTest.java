@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.bratchin.coursework2.entity.Question;
 import ru.bratchin.coursework2.exception.MyIllegalArgumentException;
@@ -23,9 +25,9 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 class ExaminerServiceImplTest {
 
     private ExaminerServiceImpl service;
-    @MockBean
+    @Mock
     private JavaQuestionService javaService;
-    @MockBean
+    @Mock
     private MathQuestionService mathService;
 
     @BeforeEach
@@ -52,6 +54,31 @@ class ExaminerServiceImplTest {
 
             assertThat(questions.size()).isEqualTo(2);
             assertThat(questions).containsAll(Set.of(mathQuestion, javaQuestion));
+        }
+
+        @ParameterizedTest
+        @CsvSource(
+                {
+                        "-1",
+                        "0"
+                }
+        )
+        void incorrectAmount(int amount) {
+            Question javaQuestion = new Question("Какой метод запускает программу на Java?", "main");
+            Question mathQuestion = new Question("49 / 7", "7");
+            Mockito.when(javaService.getRandomQuestion())
+                    .thenReturn(javaQuestion);
+            Mockito.when(javaService.getAll())
+                    .thenReturn(Set.of(javaQuestion));
+            Mockito.when(mathService.getRandomQuestion())
+                    .thenReturn(mathQuestion);
+            Mockito.when(mathService.getAll())
+                    .thenReturn(Set.of(mathQuestion));
+
+            Set<Question> questions = new HashSet<>(service.getQuestions(amount));
+
+            assertThat(questions.size()).isEqualTo(0);
+            assertThat(questions).isEmpty();
         }
 
         @RepeatedTest(5)

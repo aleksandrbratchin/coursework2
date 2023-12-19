@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.bratchin.coursework2.entity.Question;
 import ru.bratchin.coursework2.repository.impl.java.JavaQuestionRepository;
@@ -21,7 +21,7 @@ class JavaQuestionServiceTest {
 
     private JavaQuestionService service;
 
-    @MockBean
+    @Mock
     private JavaQuestionRepository repository;
 
     @BeforeEach
@@ -71,29 +71,29 @@ class JavaQuestionServiceTest {
             assertThat(removed).isEqualTo(question);
         }
 
-        @Test
-        void getRandomQuestion() {
-            Mockito.when(repository.getAll())
-                    .thenReturn(questions);
+        @Nested
+        class RandomQuestion {
+            @Test
+            void repositoryIsNotEmpty() {
+                Mockito.when(repository.getAll())
+                        .thenReturn(questions);
 
-            Question question = service.getRandomQuestion();
+                Question question = service.getRandomQuestion();
 
-            assertThat(question).isIn(questions);
+                assertThat(question).isIn(questions);
+            }
+
+            @Test
+            void repositoryIsEmpty() {
+                Mockito.when(repository.getAll())
+                        .thenReturn(Set.of());
+
+                Question question = service.getRandomQuestion();
+
+                assertThat(question).isNull();
+            }
         }
 
-    }
-
-    @Nested
-    class AllError {
-        @Test
-        void getRandomQuestion() {
-            Mockito.when(repository.getAll())
-                    .thenReturn(Set.of());
-
-            Question question = service.getRandomQuestion();
-
-            assertThat(question).isNull();
-        }
     }
 
 }

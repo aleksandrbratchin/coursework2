@@ -4,7 +4,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import ru.bratchin.coursework2.entity.Question;
+import ru.bratchin.coursework2.exception.IncorrectQuestionException;
 import ru.bratchin.coursework2.exception.QuestionIsAlreadyPresentException;
 import ru.bratchin.coursework2.exception.QuestionNotFoundException;
 
@@ -12,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -86,29 +90,66 @@ class MathQuestionRepositoryTest {
             repository = new MathQuestionRepository();
         }
 
-        @Test
-        void add() throws IllegalAccessException {
-            Question question = new Question("5 * 5", "25");
-            Set<Question> questions = new HashSet<>(
-                    Set.of(question)
-            );
-            fieldQuestions.set(repository, questions);
+        @Nested
+        class AddTest {
 
-            Throwable thrown = catchThrowable(() -> repository.add(question));
+            @Test
+            void questionIsAlreadyPresent() throws IllegalAccessException {
+                Question question = new Question("5 * 5", "25");
+                Set<Question> questions = new HashSet<>(
+                        Set.of(question)
+                );
+                fieldQuestions.set(repository, questions);
 
-            assertThat(thrown).isInstanceOf(QuestionIsAlreadyPresentException.class)
-                    .hasMessageContaining(question.getQuestion());
+                Throwable thrown = catchThrowable(() -> repository.add(question));
+
+                assertThat(thrown).isInstanceOf(QuestionIsAlreadyPresentException.class)
+                        .hasMessageContaining(question.getQuestion());
+            }
+
+            @ParameterizedTest
+            @MethodSource("incorrectQuestion")
+            void questionIncorrect(Question question) {
+                Throwable thrown = catchThrowable(() -> repository.add(question));
+
+                assertThat(thrown).isInstanceOf(IncorrectQuestionException.class);
+            }
+
+            private static Stream<Question> incorrectQuestion() {
+                return Stream.of(
+                        null,
+                        new Question(null, "25"),
+                        new Question("5 * 5", null)
+                );
+            }
+
         }
 
-        @Test
-        void remove() {
-            Question question = new Question("8 * 7", "56");
 
-            Throwable thrown = catchThrowable(() -> repository.remove(question));
+        @Nested
+        class RemoveTest {
+            @Test
+            void remove() {
+                Question question = new Question("8 * 7", "56");
 
-            assertThat(thrown).isInstanceOf(QuestionNotFoundException.class)
-                    .hasMessageContaining(question.getQuestion());
+                Throwable thrown = catchThrowable(() -> repository.remove(question));
+
+                assertThat(thrown).isInstanceOf(QuestionNotFoundException.class)
+                        .hasMessageContaining(question.getQuestion());
+            }
+
+
+            @Test
+            void questionIsNull() {
+                Question question = null;
+
+                Throwable thrown = catchThrowable(() -> repository.remove(question));
+
+                assertThat(thrown).isInstanceOf(NullPointerException.class);
+            }
+
         }
+
 
     }
 }
