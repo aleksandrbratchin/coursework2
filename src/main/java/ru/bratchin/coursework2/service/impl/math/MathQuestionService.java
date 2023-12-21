@@ -14,7 +14,7 @@ import java.util.Random;
 public class MathQuestionService implements QuestionService {
 
     private final QuestionRepository repository;
-
+    private final Random random = new Random();
     public MathQuestionService(@Qualifier("mathQuestionRepository") QuestionRepository repository) {
         this.repository = repository;
     }
@@ -43,7 +43,7 @@ public class MathQuestionService implements QuestionService {
     public Question getRandomQuestion() {
         List<Question> all = getAll().stream().toList();
         return all.size() == 0 ? null :
-                all.get(new Random().nextInt(all.size()));
+                all.get(random.nextInt(all.size()));
     }
 
 }

@@ -16,6 +16,7 @@ import ru.bratchin.coursework2.service.impl.java.JavaQuestionService;
 import ru.bratchin.coursework2.service.impl.math.MathQuestionService;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +33,7 @@ class ExaminerServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new ExaminerServiceImpl(javaService, mathService);
+        service = new ExaminerServiceImpl(List.of(javaService, mathService));
     }
 
     @Nested

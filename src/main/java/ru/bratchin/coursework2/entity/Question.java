@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Question {
 
-    String question;
-    String answer;
+    private String question;
+    private String answer;
 
     public Question(String question, String answer) {
         this.question = question;

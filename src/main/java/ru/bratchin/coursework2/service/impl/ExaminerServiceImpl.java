@@ -1,6 +1,5 @@
 package ru.bratchin.coursework2.service.impl;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.bratchin.coursework2.entity.Question;
 import ru.bratchin.coursework2.exception.MyIllegalArgumentException;
@@ -16,11 +15,9 @@ public class ExaminerServiceImpl implements ExaminerService {
     public List<QuestionService> services;
 
     public ExaminerServiceImpl(
-            @Qualifier("javaQuestionService") QuestionService javaService,
-            @Qualifier("mathQuestionService") QuestionService mathService) {
-        services = new ArrayList<>();
-        this.services.add(javaService);
-        this.services.add(mathService);
+            List<QuestionService> services
+    ) {
+        this.services = services;
     }
 
 
@@ -31,14 +28,15 @@ public class ExaminerServiceImpl implements ExaminerService {
                 .flatMapToInt(questionService -> IntStream.of(questionService.getAll().size()))
                 .sum();
         if (maxQuestions < amount) throw new MyIllegalArgumentException("Нет такого количества вопросов");
+        Question randomQuestion;
+        QuestionService randomService;
+        Random random = new Random();
         while (questions.size() < amount) {
-            Question randomQuestion;
             do {
-                QuestionService randomService = services.get(new Random().nextInt(services.size()));
+                randomService = services.get(random.nextInt(services.size()));
                 randomQuestion = randomService.getRandomQuestion();
             } while (randomQuestion == null);
             questions.add(randomQuestion);
-
         }
         return questions;
     }
